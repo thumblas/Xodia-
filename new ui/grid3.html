@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>
+		Grid
+	</title>
+</head>
+<body>
+	<canvas id="canvas" height="560px" width="560px" style="z-index:0;position : absolute; left : 0; top : 0;"></canvas>
+	<canvas id="canvas1" height="560px" width="560px" style="z-index:3;position : absolute; left : 0; top : 0;"></canvas>
+	<canvas id="canvas2" height="560px" width="560px" style="z-index:6;position : absolute; left : 0; top : 0;"></canvas>
+
+	<p id="test" style="position:absolute;left:560px;">x: y:</p>	
+	<p id="test2" style="position:absolute;left:560px;"></p>
+</body>
+<script src="testing3.js"></script>
+
+<script type="text/javascript">
+		var canvas =document.getElementById("canvas");
+		var ctx=canvas.getContext("2d");
+		var W = 560;
+		var H=560;
+		var gridSize=70;
+		var turn=1;
+		canvas.width = W;
+		canvas.height = H;
+		var colour_pawn=new Array("#5e2612","#ee9572","#8b5742","#d2691e","#8a360f","#FFA54F","#b8860b","#cdaf95");
+		var colour_player=new Array("white","black");
+		var colourplayer,colourpawn;
+		var winflag=0;
+		function color1()
+		{
+			var i=0;	
+			for(i=0;i<=W;i+=gridSize)
+			{
+				ctx.beginPath();
+				ctx.rect(i,i,gridSize,gridSize);
+				ctx.fillStyle="#5e2612";
+				ctx.fill();
+				
+			}
+		}	
+		function color2()
+		{
+			var i;
+			var j=0;
+			for(i=W-gridSize;i>=0;i-=gridSize)
+			{
+				ctx.beginPath();
+				ctx.rect(i,j,gridSize,gridSize);
+				ctx.fillStyle="#cdaf95";
+				ctx.fill();
+				j+=gridSize;
+				
+			}
+		}
+		function color3()
+		{
+			var i;
+			var j=4*gridSize;
+			for(i=0;i<=W;i+=gridSize)
+			{
+				if(j>=W)
+				{
+					j=0;
+				}
+					ctx.beginPath();
+					ctx.rect(i,j,gridSize,gridSize);
+					ctx.fillStyle="#8a360f";
+					ctx.fill();	
+					j+=gridSize;
+			}
+		}	
+		
+		function color4()
+		{
+			var i;
+			var j=3*gridSize;
+			for(i=0;i<=W;i+=gridSize)
+			{
+				if(j<0)
+				{
+					j=W-gridSize;
+				}
+					ctx.beginPath();
+					ctx.rect(i,j,gridSize,gridSize);
+					ctx.fillStyle="#d2691e";
+					ctx.fill();	
+					j-=gridSize;
+			}
+		}	
+		function color5()
+		{
+
+			var i;
+			var j=gridSize;
+			for(i=0;i<=W;i+=gridSize)
+			{
+				if(j>=W)
+				{
+					j-=W;
+				}
+					ctx.beginPath();
+					ctx.rect(i,j,gridSize,gridSize);
+					ctx.fillStyle="#FFA54F";
+					ctx.fill();	
+					j+=3*gridSize;
+			}
+		}	
+		/*#8b5742*/
+		function color6()
+		{
+
+			var i;
+			var j=2*gridSize;
+			for(i=0;i<=W;i+=gridSize)
+			{
+				if(j>=W)
+				{
+					j-=W;
+				}
+					ctx.beginPath();
+					ctx.rect(i,j,gridSize,gridSize);
+					ctx.fillStyle="#b8860b";
+					ctx.fill();	
+					j+=5*gridSize;
+			}
+		}/*#b8860b*/
+		function color7()
+		{
+
+			var i;
+			var j=5*gridSize;
+			for(i=0;i<=W;i+=gridSize)
+			{
+				if(j>=W)
+				{
+					j-=W;
+				}
+					ctx.beginPath();
+					ctx.rect(i,j,gridSize,gridSize);
+					ctx.fillStyle="#ee9572";
+					ctx.fill();	
+					j+=3*gridSize;
+			}
+		}
+		function color8()
+		{
+
+			var i;
+			var j=6*gridSize;
+			for(i=0;i<=W;i+=gridSize)
+			{
+				if(j>=W)
+				{
+					j-=W;
+				}
+					ctx.beginPath();
+					ctx.rect(i,j,gridSize,gridSize);
+					ctx.fillStyle="#8b5742";
+					ctx.fill();	
+					j+=5*gridSize;
+			}
+		}
+		
+		var canvas2=document.getElementById("canvas2");
+		var c=canvas2.getContext("2d");
+		var canvas1=document.getElementById("canvas1");
+		var c1=canvas1.getContext("2d");
+		
+		function drawPawn(PlayerColour,PawnColour,x,y,bomb1)
+		{
+			c1.beginPath();
+			c1.arc(x,y,25,0,2*Math.PI);
+			c1.fillStyle=PlayerColour;
+			c1.fill();
+			c1.closePath();
+			c1.beginPath();
+			c1.rect(x-14,y-14,28,28);
+			c1.fillStyle=PawnColour;
+			c1.fill();
+			c1.closePath();
+			/*c1.beginPath();
+			c1.arc(x,y,5,0,2*Math.PI);
+			c1.fillStyle=PlayerColour;
+			c1.fill();
+			c1.closePath();*/
+			if(bomb1==1)
+			{
+				c1.beginPath();
+				c1.arc(x,y,5,0,2*Math.PI);
+				c1.fillStyle=PlayerColour;
+				c1.fill();
+				c1.closePath();
+				c1.stroke();
+			}
+			
+		}
+		function drawBomb(PlayerColour,x1,y1)
+		{
+			c1.beginPath();
+				c1.arc(x1,y1,5,0,2*Math.PI);
+				c1.fillStyle=PlayerColour;
+				c1.fill();
+				c1.closePath();
+				c1.stroke();
+		}
+var initX,initY;		
+var cursorX;
+var cursorY;
+var gridX1;
+var gridY1;
+
+var flag=0;
+var dx,dy;
+var f;
+var invalid1;
+    	function animate(x1,y1,x2,y2,PlayerColour,PawnColour,bomb1)
+   			{
+   				f=0;
+   				if(x1<x2)
+					dx=1;
+				else if(x1>x2)
+					dx=-1;
+				else
+					dx=0;
+				if(y1<y2)
+					dy=1;
+				else if(y1>y2)
+						dy=-1;
+				else
+					dy=0;
+      			c.clearRect(x1-27,y1-27,53,53);
+         		c.beginPath();
+				c.arc(x1,y1,25,0,2*Math.PI);
+				c.fillStyle=PlayerColour;
+				c.fill();
+				c.closePath();
+				c.beginPath();
+				c.rect(x1-15,y1-15,30,30);
+				c.fillStyle=PawnColour;
+				c.fill();
+				c.closePath();
+				if(bomb1==1)
+				{
+				c.beginPath();
+				c.arc(x1,y1,5,0,2*Math.PI);
+				c.fillStyle=PlayerColour;
+				c.fill();
+				c.closePath();
+				c.stroke();
+				}
+
+					y1+=dy;
+					x1+=dx;
+				initX=gridX1;
+				initY=gridY1;	
+				if((x1==x2)&&(y1==y2))
+					f=1;
+				if((x1!=x2)||(y1!=y2))		
+					setTimeout(animate,1,x1,y1,x2,y2,PlayerColour,PawnColour,bomb1);
+				if(f==1)
+				{	
+					c.clearRect(x1-27,y1-27,53,53);
+					drawPawn(PlayerColour,PawnColour,x2,y2,bomb1);
+				}
+			}	
+		function animate1(x1,y1,x2,y2,PlayerColour)
+   			{
+   				f=0;
+   				if(x1<x2)
+					dx=1;
+				else if(x1>x2)
+					dx=-1;
+				else
+					dx=0;
+				if(y1<y2)
+					dy=1;
+				else if(y1>y2)
+						dy=-1;
+				else
+					dy=0;
+				c.clearRect(x1-7,y1-7,15,15);
+				c.beginPath();
+				c.arc(x1,y1,5,0,2*Math.PI);
+				c.fillStyle=PlayerColour;
+				c.fill();
+				c.closePath();
+				c.stroke();
+					y1+=dy;
+					x1+=dx;
+				initX=gridX1;
+				initY=gridY1;	
+				if((x1==x2)&&(y1==y2))
+					f=1;
+				if((x1!=x2)||(y1!=y2))
+					
+				setTimeout(animate1,1,x1,y1,x2,y2,PlayerColour);
+					//if((x1==x2)||(y1==y2))
+					//	animate(x1,y1,x2,y2,PlayerColour,PawnColour);
+				if(f==1)
+				{	
+					c.clearRect(x1-7,y1-7,15,15);
+					drawBomb(PlayerColour,x2,y2);
+				}
+			}
+	function doublefirst(e)
+	{
+		if(winflag!=1 && winflag!=2)
+			{
+   		 		cursorX = e.pageX-canvas.offsetLeft;
+				cursorY = e.pageY-canvas.offsetTop;
+    			if(cursorX<0||cursorX>canvas.width)
+    				{	document.getElementById('test').innerHTML = "Out of bound!!";}
+    			else if(cursorY<0||cursorY>canvas.width)
+    				{	document.getElementById('test').innerHTML = "Out of bound!!";}
+    			else
+    				{
+    					gridX1=Math.floor(cursorX/70);
+			    		gridY1=Math.floor(cursorY/70);
+    					document.getElementById('test').innerHTML = "x: " + cursorX + ", y: " + cursorY+" With contextmenu click!!"+"  Grid position:: x:"+gridX1+ " y:"+gridY1;
+						invalid1=validateselection(0,gridY1,gridX1);
+    					if(invalid1!=666)
+    						{
+    							initX=gridX1;
+    							initY=gridY1;
+    							flag=2;
+  						  	}
+    				}
+    		}
+	}
+
+	
+	function singlefirst(e) 
+	{
+		if(winflag!=1 && winflag!=2)
+			{
+    			if(turn==1)
+   				 	{
+    					cursorX = e.pageX-canvas.offsetLeft;
+    					cursorY = e.pageY-canvas.offsetTop;
+						if(cursorX<0||cursorX>canvas.width)
+    						{   document.getElementById('test').innerHTML = "Out of bound!!";}
+				    	else if(cursorY<0||cursorY>canvas.width)
+    						{	document.getElementById('test').innerHTML = "Out of bound!!";}
+    					else
+    						{
+    							gridX1=Math.floor(cursorX/70);
+    							gridY1=Math.floor(cursorY/70);
+  						  		document.getElementById('test').innerHTML = "x: " + cursorX + ", y: " + cursorY+" With first single click!!"+"  Grid position:: x:"+gridX1+ " y:"+gridY1;
+   							
+   							 	invalid1=bombplacing(gridY1,gridX1);
+    							if(invalid1!=666)
+    								{
+    									turn++;
+    									drawBomb("white",gridX1*70+35,gridY1*70+35);
+    								}
+    						}
+    				}
+
+    	else if(turn==2)
+    		{
+    			cursorX = e.pageX-canvas.offsetLeft;
+    			cursorY = e.pageY-canvas.offsetTop;
+				if(cursorX<0||cursorX>canvas.width)
+    				{   document.getElementById('test').innerHTML = "Out of bound!!";}
+    			else if(cursorY<0||cursorY>canvas.width)
+    				{	document.getElementById('test').innerHTML = "Out of bound!!";}
+    			else
+				{
+    				gridX1=Math.floor(cursorX/70);
+    				gridY1=Math.floor(cursorY/70);
+    				document.getElementById('test').innerHTML = "x: " + cursorX + ", y: " + cursorY+" With first single click!!"+"  Grid position:: x:"+gridX1+ " y:"+gridY1;
+
+			    	invalid1=bombplacing(gridY1,gridX1);
+    				if(invalid1!=666)
+    					{
+    						turn++;
+    						drawBomb("black",gridX1*70+35,gridY1*70+35);
+    					}
+    			}
+		   	}
+
+    	else if(flag==0 && turn>2)
+    		{
+		    	cursorX = e.pageX-canvas.offsetLeft;
+    			cursorY = e.pageY-canvas.offsetTop;
+				if(cursorX<0||cursorX>canvas.width)
+    				{   document.getElementById('test').innerHTML = "Out of bound!!";}
+    			else if(cursorY<0||cursorY>canvas.width)
+    				{	document.getElementById('test').innerHTML = "Out of bound!!";}
+    			else
+    				{
+    					gridX1=Math.floor(cursorX/70);
+    					gridY1=Math.floor(cursorY/70);
+    					document.getElementById('test').innerHTML = "x: " + cursorX + ", y: " + cursorY+" With first single click!!"+"  Grid position:: x:"+gridX1+ " y:"+gridY1;
+    	
+    					invalid1=validateselection(1,gridY1,gridX1);
+    	
+    					if(invalid1!=666)
+    						{
+    							initX=gridX1;
+								initY=gridY1;
+
+    							flag=1;
+    						}
+    					else 
+							{
+								flag=0;
+								document.getElementById('test').innerHTML =document.getElementById('test').innerHTML +'<br>'+" Play again!";
+							}
+    				}
+   			}
+
+   		else if(flag==1 && turn>2)
+   			{
+    			cursorX = e.pageX-canvas.offsetLeft;
+    			cursorY = e.pageY-canvas.offsetTop;
+				if(cursorX<0||cursorX>canvas.width)
+    				{   document.getElementById('test').innerHTML = "Out of bound!!";}
+    			else if(cursorY<0||cursorY>canvas.width)
+    				{	document.getElementById('test').innerHTML = "Out of bound!!";}
+    			else
+    				{
+    					gridX1=Math.floor(cursorX/70);
+    					gridY1=Math.floor(cursorY/70);
+    					document.getElementById('test').innerHTML = "x: " + cursorX + ", y: " + cursorY+" With second single click!!"+"  Grid position:: x:"+gridX1+ " y:"+gridY1;
+
+    					invalid1=validatelanding(1,initY,initX,gridY1,gridX1);
+
+    					if(invalid1!=666)
+    						{
+    							var x1=initX*70+35;
+								var y1=initY*70+35;
+								var x2=gridX1*70+35;
+								var y2=gridY1*70+35;
+								flag=0;
+								c1.clearRect(x1-27,y1-27,52,52);
+								turn++;
+								colourplayer=turn%2;
+								bomb=Math.floor(invalid1/8);
+								colourpawn=invalid1%8;
+								animate(x1,y1,x2,y2,colour_player[colourplayer],colour_pawn[colourpawn],bomb);
+							}
+
+						else 
+							{
+								flag=0;
+								document.getElementById('test').innerHTML =document.getElementById('test').innerHTML +'<br>'+"Play again!";
+							}
+					}
+			}
+
+		else if(flag==2 && turn>2 )
+			{
+				cursorX = e.pageX-canvas.offsetLeft;
+    			cursorY = e.pageY-canvas.offsetTop;
+				if(cursorX<0||cursorX>canvas.width)
+    				{   document.getElementById('test').innerHTML = "Out of bound!!";}
+    			else if(cursorY<0||cursorY>canvas.width)
+    				{	document.getElementById('test').innerHTML = "Out of bound!!";}
+    			else
+    				{
+    					gridX1=Math.floor(cursorX/70);
+    					gridY1=Math.floor(cursorY/70);
+    					document.getElementById('test').innerHTML = "x: " + cursorX + ", y: " + cursorY+" With second single click!!"+"  Grid position:: x:"+gridX1+ " y:"+gridY1;
+
+    					invalid1=validatelanding(0,initY,initX,gridY1,gridX1);
+    					if(invalid1!=666)
+    						{
+    							var x1=initX*70+35;
+								var y1=initY*70+35;
+								var x2=gridX1*70+35;
+								var y2=gridY1*70+35;
+								colourplayer=(turn+1)%2;
+								flag=0;
+								turn++;
+								colourpawn=invalid1%8;
+								c1.clearRect(x1-7,y1-7,15,15);
+								c1.beginPath();
+								c1.rect(x1-7,y1-7,15,15);
+								c1.fillStyle=colour_pawn[colourpawn];
+								c1.fill();
+								c1.closePath();
+
+								animate1(x1,y1,x2,y2,colour_player[colourplayer]);
+							}
+						else 
+							{
+								flag=0;
+								document.getElementById('test').innerHTML =document.getElementById('test').innerHTML +'<br>'+"Play again!";
+							}
+					}
+		}
+	}
+}
+		color1();
+		color2();
+		color3();
+		color4();
+		color5();
+		color6();
+		color7();
+		color8();
+		drawPawn("white","#5e2612",35,35,0);
+		drawPawn("white","#ee9572",105,35,0);
+		drawPawn("white","#8b5742",175,35,0);
+		drawPawn("white","#d2691e",245,35,0);
+		drawPawn("white","#8a360f",315,35,0);
+		drawPawn("white","#FFA54F",385,35,0);
+		drawPawn("white","#b8860b",455,35,0);
+		drawPawn("white","#cdaf95",525,35,0);
+
+		drawPawn("black","#5e2612",525,525,0);
+		drawPawn("black","#ee9572",455,525,0);
+		drawPawn("black","#8b5742",385,525,0);
+		drawPawn("black","#d2691e",315,525,0);
+		drawPawn("black","#8a360f",245,525,0);
+		drawPawn("black","#FFA54F",175,525,0);
+		drawPawn("black","#b8860b",105,525,0);
+		drawPawn("black","#cdaf95",35,525,0);
+	function makeDoubleClick(doubleClickCallback, singleClickCallback) 
+	{
+    var clicks = 0, timeout;
+    return function() 
+    {
+        clicks++;
+        if (clicks == 1) 
+        {
+            singleClickCallback && singleClickCallback.apply(this, arguments);
+            timeout = setTimeout(function() { clicks = 0; }, 400);
+        } 
+        else 
+        {
+            timeout && clearTimeout(timeout);
+            doubleClickCallback && doubleClickCallback.apply(this, arguments);
+            clicks = 0;
+        }
+    };
+	}
+	var main =function()
+	{
+			document.addEventListener('click', makeDoubleClick(doublefirst, singlefirst));
+			flag1=0;
+	}
+
+
+	 main();
+	
+
+</script>
+</html>
